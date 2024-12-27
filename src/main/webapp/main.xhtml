@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+
+<html lang="ru"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://xmlns.jcp.org/jsf/html">
+
+    <h:head>
+        <title>NO MERCY</title>
+        <link rel="icon" href="resources/images/favicon.png" type="image/png"/>
+        <link rel="stylesheet" href="./resources/styles/styles.css"/>
+        <meta charset="UTF-8"/>
+    </h:head>
+
+    <h:body>
+        <header>
+            <div class="hub">
+                <a href="https://sp.freehat.cc/episode/season-1/"><h1>Web<span>Lab</span></h1></a>
+            </div>
+            <div>
+                <p>Шнейдерис Герардас Герардович</p>
+                <p>группа: P3220</p>
+                <p>вариант: 10901</p>
+            </div>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="https://se.ifmo.ru/teacher"> Главное </a></li>
+                <li><a href="#grid"> Форма </a></li>
+                <li><a href="#footer"> Партнеры </a></li>
+                <li>
+                    <h:link value="Назад" outcome="index" />
+                </li>
+            </ul>
+        </nav>
+
+
+        <div id="canvas_container">
+            <canvas id="grid" width="800" height="800">.</canvas>
+            <div id="click_error_div" class="error_label">.</div>
+            <div id="cringe_area">
+                <img src="resources/images/saturday.gif" alt="открытка" width="640" height="480"/>
+            </div>
+        </div>
+
+
+        <h:form id="form">
+            <div id="x" class="form_answers">
+                <label class="form_label">X:</label>
+                <h:inputText id="x_input" name="x" class ="form_answers"
+                             value="#{formBean.x}"
+                             required="true"
+                             requiredMessage="Без икса не получится"
+                             converterMessage="Умоляю, введите число, а не какую-то шляпу"
+                             validatorMessage="Число должно быть от -3 до 5"
+                             title="Введите X">
+                    <f:validateDoubleRange
+                                minimum="-3"
+                                maximum="5" />
+
+                    <f:ajax listener="#{formBean.setX}" render="x_input"/>
+                </h:inputText>
+                <h:message styleClass="error_message" id="x_error" for="x_input"/>
+            </div>
+
+            <div id="y" class="form_answers">
+                <p:outputLabel styleClass="form_label" for="ySlider" value="Y:"/>
+                <h:outputText id="yValue" value="#{formBean.y}"/>
+                <h:inputHidden id="yInput" value="#{formBean.y}"/>
+                <p:slider for="yInput"
+                          id="ySlider"
+                          display="yValue"
+                          minValue="-5"
+                          maxValue="5"
+                          step="0.01"
+                          styleClass="slider">
+                    <p:ajax onevent="slideEnd"  listener="#{formBean.onSlideEnd}"/>
+                </p:slider>
+            </div>
+
+            <div id="r" class="form_answers">
+                <label class="form_label">R:</label>
+                <h:selectOneRadio value="#{formBean.r}"
+                                  required="true"
+                                  id="r_select"
+                                  requiredMessage="Без радиуса не получится"
+                                  onchange="changeRadius(this.value);"
+                                  style="text-align: center; margin: auto auto; width: 50%">
+                    <f:selectItem name="r" itemValue="1" itemLabel="1" />
+                    <f:selectItem name="r" itemValue="2" itemLabel="2" />
+                    <f:selectItem name="r" itemValue="3" itemLabel="3" />
+                    <f:selectItem name="r" itemValue="4" itemLabel="4" />
+                    <f:selectItem name="r" itemValue="5" itemLabel="5" />
+
+                    <f:ajax listener="#{formBean.setR}" render="r_select" update="grid"/>
+                </h:selectOneRadio>
+            </div>
+
+            <p:commandButton
+                    id="submitButton"
+                    styleClass="submit"
+                    value="Отправить"
+                    action="#{formBean.submit()}"
+                    update="table"
+                    process="@form"
+                    onstart="handleFormClick"
+            />
+        </h:form>
+
+        <div class="container">
+            <p:dataTable value="#{formBean.attempts}" emptyMessage="" var="attempt" id="table">
+                <p:remoteCommand name=""/>
+                <p:column headerText="X" >
+                    <h:outputText value="#{attempt.x}" />
+                </p:column>
+                <p:column headerText="Y">
+                    <h:outputText value="#{attempt.y}" />
+                </p:column>
+                <p:column headerText="R" >
+                    <h:outputText value="#{attempt.r}" />
+                </p:column>
+                <p:column headerText="Результат" >
+                    <h:outputText value="#{attempt.hit ? 'hit' : 'miss'}"
+                                  style="color: #{attempt.hit ? 'orange' : 'white'}"/>
+                </p:column>
+                <p:column headerText="Время отправки" >
+                    <h:outputText value="#{attempt.currTime}" />
+                </p:column>
+            </p:dataTable>
+            <div id="pagination" class="pagination"></div>
+            <footer id="footer">
+                <p>
+                    Этот сайт написан китайскими детьми, если хотите пожертвовать денег им на айфон перейдите по
+                    <a href="https://www.kinopoisk.ru/film/432725/">ссылке</a>
+                </p>
+                <p>
+                    <img src="resources/images/itmo.png" alt="логотип ИТМО" width="300px"/>
+                </p>
+            </footer>
+        </div>
+
+        <p:remoteCommand name="addAttempt" action="#{formBean.addFromJS()}" update="table" process="@this"/>
+
+        <script src="./resources/scripts/canvas.js">1</script>
+        <script src="./resources/scripts/table.js">2</script>
+        <script src="resources/scripts/script.js">3</script>
+    </h:body>
+</html>
